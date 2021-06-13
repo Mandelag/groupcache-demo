@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/mailgun/groupcache"
 )
@@ -21,6 +22,8 @@ func (s *SimpleHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	t0 := time.Now()
+
 	cacheGroup := groupcache.GetGroup("generator")
 	var cacheValue string
 	err := cacheGroup.Get(context.Background(), name, groupcache.StringSink(&cacheValue))
@@ -29,5 +32,5 @@ func (s *SimpleHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "You are served by %v (%v).\nCache data: `%v`.\n", s.IP, s.IPExternal, cacheValue)
+	fmt.Fprintf(w, "You've been served by %v (%v) in %v ms.\nCache data: `%v`.\n", s.IPExternal, s.IP, time.Since(t0).Milliseconds(), cacheValue)
 }
